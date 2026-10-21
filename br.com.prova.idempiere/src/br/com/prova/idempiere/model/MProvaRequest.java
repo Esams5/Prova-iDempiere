@@ -60,12 +60,14 @@ public class MProvaRequest extends PO {
     }
 
     public void setGrandTotal(BigDecimal value) {
-        set_ValueOfColumn(RequestColumns.GRAND_TOTAL, value);
+        // Campos calculados e de estado sao somente leitura na janela, mas o
+        // processo do servidor precisa atualiza-los explicitamente.
+        set_ValueNoCheck(RequestColumns.GRAND_TOTAL, value);
     }
 
     public void approve() {
-        set_ValueOfColumn(RequestColumns.STATUS, RequestColumns.STATUS_APPROVED);
-        set_ValueOfColumn(RequestColumns.PROCESSED, true);
+        set_ValueNoCheck(RequestColumns.STATUS, RequestColumns.STATUS_APPROVED);
+        set_ValueNoCheck(RequestColumns.PROCESSED, true);
     }
 
     private BigDecimal asBigDecimal(Object value) {

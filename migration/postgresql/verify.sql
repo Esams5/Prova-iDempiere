@@ -13,6 +13,14 @@ SELECT 'Processos', COUNT(*) FROM AD_Process WHERE Value LIKE 'PROVA_Request_%'
 UNION ALL
 SELECT 'Model Validator', COUNT(*) FROM AD_ModelValidator
  WHERE ModelValidationClass='br.com.prova.idempiere.validator.RequestModelValidator'
+   AND IsActive='Y'
 UNION ALL
-SELECT 'Menus', COUNT(*) FROM AD_Menu WHERE Name LIKE 'Solicitacoes de Compra%';
+SELECT 'Menus', COUNT(*) FROM AD_Menu WHERE Name LIKE 'Solicitacoes de Compra%'
+UNION ALL
+SELECT 'Botao Aprovar no formulario', COUNT(*)
+  FROM AD_Column
+ WHERE AD_Table_ID=(SELECT AD_Table_ID FROM AD_Table
+                     WHERE lower(TableName)=lower('PROVA_Request'))
+   AND ColumnName='Approve'
+   AND IsToolbarButton='N';
 

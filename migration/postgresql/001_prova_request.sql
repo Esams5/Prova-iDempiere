@@ -262,7 +262,7 @@ BEGIN
                  r.updateable, r.selection_column, 'U', 'N',
                  'N', 'N', 'Y', generate_uuid(statement_timestamp()),
                  'Y', CASE WHEN r.selection_column='Y' THEN r.field_seq ELSE 0 END,
-                 CASE WHEN r.reference_id=28 THEN 'Y' ELSE 'N' END, 'N',
+                 'N', 'N',
                  'N', 'N', r.process_id);
         END IF;
 
@@ -300,6 +300,11 @@ BEGIN
       FROM AD_Column c
      WHERE f.AD_Column_ID=c.AD_Column_ID AND f.AD_Tab_ID=v_tab_id
        AND c.ColumnName='Approve';
+    -- O botao deve aparecer dentro da janela.  "Y" significa somente toolbar
+    -- e, sem uma configuracao de toolbar dedicada, torna o processo invisivel.
+    UPDATE AD_Column
+       SET IsToolbarButton='N', Updated=statement_timestamp(), UpdatedBy=100
+     WHERE AD_Table_ID=v_table_id AND ColumnName='Approve';
 
     -- Report View e formato nativo -----------------------------------------
     SELECT AD_ReportView_ID INTO v_report_view_id

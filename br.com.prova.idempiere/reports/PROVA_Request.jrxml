@@ -26,9 +26,12 @@
       JOIN c_bpartner bp ON bp.c_bpartner_id = r.c_bpartner_id
  LEFT JOIN m_product p ON p.m_product_id = r.m_product_id
      WHERE r.ad_client_id = $P{AD_CLIENT_ID}
-       AND ($P{DateDoc1} IS NULL OR r.datedoc >= $P{DateDoc1})
-       AND ($P{DateDoc2} IS NULL OR r.datedoc < $P{DateDoc2} + INTERVAL '1 day')
-       AND ($P{Status} IS NULL OR r.status = $P{Status})
+       AND (CAST($P{DateDoc1} AS timestamp) IS NULL
+            OR r.datedoc >= CAST($P{DateDoc1} AS timestamp))
+       AND (CAST($P{DateDoc2} AS timestamp) IS NULL
+            OR r.datedoc < CAST($P{DateDoc2} AS timestamp) + INTERVAL '1 day')
+       AND (CAST($P{Status} AS varchar) IS NULL
+            OR r.status = CAST($P{Status} AS varchar))
   ORDER BY r.datedoc, r.documentno
   ]]></queryString>
 

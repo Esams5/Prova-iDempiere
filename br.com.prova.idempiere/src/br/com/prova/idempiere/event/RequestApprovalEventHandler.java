@@ -1,34 +1,31 @@
 package br.com.prova.idempiere.event;
 
-import java.util.logging.Level;
-
-import org.adempiere.base.event.AbstractEventHandler;
-import org.adempiere.base.event.IEventTopics;
-import org.compiere.model.PO;
+import org.adempiere.base.annotation.EventTopicDelegate;
+import org.adempiere.base.annotation.ModelEventTopic;
+import org.adempiere.base.event.annotations.ModelEventDelegate;
+import org.adempiere.base.event.annotations.po.AfterChange;
 import org.compiere.util.CLogger;
 import org.osgi.service.event.Event;
 
+import br.com.prova.idempiere.model.MProvaRequest;
 import br.com.prova.idempiere.model.RequestColumns;
 
 /** observer OSGi para aprovacoes. */
-public class RequestApprovalEventHandler extends AbstractEventHandler {
+@EventTopicDelegate
+@ModelEventTopic(modelClass = MProvaRequest.class)
+public class RequestApprovalEventHandler extends ModelEventDelegate<MProvaRequest> {
 
     private static final CLogger LOG = CLogger.getCLogger(RequestApprovalEventHandler.class);
 
-    @Override
-    protected void initialize() {
-        registerTableEvent(IEventTopics.PO_AFTER_CHANGE, RequestColumns.TABLE_NAME);
+    public RequestApprovalEventHandler(MProvaRequest request, Event event) {
+        super(request, event);
     }
 
-    @Override
-    protected void doHandleEvent(Event event) {
-        PO request = getPO(event);
-        if (request != null
-                && request.is_ValueChanged(RequestColumns.STATUS)
-                && RequestColumns.STATUS_APPROVED.equals(
-                    request.get_ValueAsString(RequestColumns.STATUS))) {
-            LOG.log(Level.INFO, "Solicitacao aprovada via evento OSGi: {0}",
-                request.get_ValueAsString(RequestColumns.DOCUMENT_NO));
+    @AfterChange
+    public void afterChange() {
+        MProvaRequest request = getModel();
+        if (RequestColumns.STATUS_APPROVED.equals(request.getStatus())) {
+            LOG.warning("Solicitacao aprovada via evento OSGi: " + request.getDocumentNo());
         }
     }
 }

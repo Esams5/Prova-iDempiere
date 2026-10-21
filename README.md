@@ -14,7 +14,7 @@ obrigatorios e dois diferenciais da prova.
 | Java Process | `ApproveRequest`, um `SvrProcess` |
 | Relatorio nativo | Periodo e status, com Print Format proprio |
 | Jasper | Mesmo filtro, layout paisagem e total geral |
-| Event Handler | Observer OSGi registra a aprovacao no log |
+| Event Handler | Delegate OSGi anotado registra a aprovacao no log |
 | Plugin OSGi | Bundle, Declarative Services, feature e repositorio P2 |
 
 O endpoint REST ficou fora do escopo por ser diferencial e depender da extensao
@@ -93,8 +93,15 @@ bash scripts/verify-local.sh
 ```
 
 Depois da primeira instalacao, entre como `System` e execute **Role Access
-Update** para a role `GardenWorld Admin`. Esse passo concede acesso aos novos
-menus sem alterar automaticamente a politica de seguranca de outras roles.
+Update** com o campo Role vazio, sem marcar **Reset Existing Access**. No tenant
+System a lista mostra apenas `System Administrator`; deixar o campo vazio
+atualiza todas as roles nao manuais, incluindo `GardenWorld Admin`. Em seguida,
+execute **Cache Reset** e faca um novo login.
+
+O passo a passo validado, desde a inicializacao ate os dois relatorios, esta em
+[docs/ROTEIRO_APRESENTACAO.md](docs/ROTEIRO_APRESENTACAO.md). Os resultados da
+ultima validacao local estao em
+[docs/TESTES_EXECUTADOS.md](docs/TESTES_EXECUTADOS.md).
 
 ## 1. Teste rapido sem servidor
 
@@ -142,8 +149,9 @@ psql -d idempiere -f migration/postgresql/verify.sql
 ```
 
 Resultado esperado: uma tabela, vinte colunas, uma janela, tres processos, um
-Model Validator e tres menus. A migracao pode ser executada novamente sem
-duplicar os registros principais.
+Model Validator ativo, tres menus e o botao Aprovar configurado para aparecer
+no formulario. A migracao pode ser executada novamente sem duplicar os
+registros principais.
 
 ## 4. Deploy do plugin
 
@@ -161,11 +169,14 @@ Validator global seja carregado.
 
 ## 5. Teste funcional
 
-1. Entre com um tenant de teste e execute **Reset Cache**.
+1. Entre como `System`, execute **Cache Reset** e depois acesse o tenant de teste.
 2. Abra **Solicitacoes de Compra**.
 3. Crie um registro com documento, parceiro, quantidade e preco.
 4. Confirme que o total muda ao editar quantidade ou preco.
 5. Salve e clique em **Aprovar**.
 6. Confirme que o status virou Aprovado e que a edicao foi bloqueada.
 7. Rode os dois relatorios pelos menus criados.
+
+Na imagem Docker usada aqui, os idiomas iniciais sao somente English e Español.
+Selecione English; isso nao indica erro na instalacao.
 
