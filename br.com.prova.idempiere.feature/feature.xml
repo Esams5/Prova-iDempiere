@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="br.com.prova.idempiere.feature"
+      label="Prova iDempiere - Solicitacao de Compra"
+      version="1.0.0.qualifier"
+      provider-name="Prova iDempiere">
+   <description>
+      Plugin: solicitacao, validacao, processo, evento e relatorios.
+   </description>
+   <license url="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html">
+      GNU General Public License version 2 ou posterior.
+   </license>
+   <plugin
+         id="br.com.prova.idempiere"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+</feature>
+

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/br.com.prova.idempiere.feature_1.0.0.qualifier.jar"
+       id="br.com.prova.idempiere.feature" version="1.0.0.qualifier">
+      <category name="prova-idempiere"/>
+   </feature>
+   <category-def name="prova-idempiere" label="Prova iDempiere"/>
+</site>
+

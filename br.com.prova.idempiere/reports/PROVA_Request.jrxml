@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+    name="PROVA_Request" pageWidth="842" pageHeight="595" orientation="Landscape"
+    columnWidth="782" leftMargin="30" rightMargin="30" topMargin="25" bottomMargin="25">
+
+  <parameter name="AD_CLIENT_ID" class="java.lang.Integer"/>
+  <parameter name="DateDoc1" class="java.sql.Timestamp" isForPrompting="false"/>
+  <parameter name="DateDoc2" class="java.sql.Timestamp" isForPrompting="false"/>
+  <parameter name="Status" class="java.lang.String" isForPrompting="false"/>
+
+  <queryString><![CDATA[
+    SELECT r.documentno,
+           r.datedoc,
+           bp.name AS bpartner_name,
+           COALESCE(p.name, r.description) AS item_name,
+           r.qty,
+           r.priceentered,
+           r.grandtotal,
+           CASE r.status WHEN 'D' THEN 'Rascunho'
+                         WHEN 'A' THEN 'Aprovado'
+                         WHEN 'R' THEN 'Rejeitado'
+                         ELSE r.status END AS status_name
+      FROM prova_request r
+      JOIN c_bpartner bp ON bp.c_bpartner_id = r.c_bpartner_id
+ LEFT JOIN m_product p ON p.m_product_id = r.m_product_id
+     WHERE r.ad_client_id = $P{AD_CLIENT_ID}
+       AND ($P{DateDoc1} IS NULL OR r.datedoc >= $P{DateDoc1})
+       AND ($P{DateDoc2} IS NULL OR r.datedoc < $P{DateDoc2} + INTERVAL '1 day')
+       AND ($P{Status} IS NULL OR r.status = $P{Status})
+  ORDER BY r.datedoc, r.documentno
+  ]]></queryString>
+
+  <field name="documentno" class="java.lang.String"/>
+  <field name="datedoc" class="java.sql.Timestamp"/>
+  <field name="bpartner_name" class="java.lang.String"/>
+  <field name="item_name" class="java.lang.String"/>
+  <field name="qty" class="java.math.BigDecimal"/>
+  <field name="priceentered" class="java.math.BigDecimal"/>
+  <field name="grandtotal" class="java.math.BigDecimal"/>
+  <field name="status_name" class="java.lang.String"/>
+
+  <variable name="TOTAL_GERAL" class="java.math.BigDecimal" calculation="Sum">
+    <variableExpression><![CDATA[$F{grandtotal}]]></variableExpression>
+  </variable>
+
+  <title>
+    <band height="48">
+      <staticText>
+        <reportElement x="0" y="0" width="782" height="28"/>
+        <textElement textAlignment="Center"><font size="18" isBold="true"/></textElement>
+        <text><![CDATA[Solicitacoes de Compra]]></text>
+      </staticText>
+      <textField>
+        <reportElement x="0" y="30" width="782" height="16"/>
+        <textElement textAlignment="Center"><font size="9"/></textElement>
+        <textFieldExpression><![CDATA["Periodo: " + ($P{DateDoc1} == null ? "inicio" : $P{DateDoc1}) + " ate " + ($P{DateDoc2} == null ? "hoje" : $P{DateDoc2})]]></textFieldExpression>
+      </textField>
+    </band>
+  </title>
+
+  <columnHeader>
+    <band height="24">
+      <rectangle><reportElement x="0" y="0" width="782" height="22" backcolor="#D9EAF7" mode="Opaque"/></rectangle>
+      <staticText><reportElement x="4" y="3" width="78" height="16"/><textElement><font isBold="true"/></textElement><text><![CDATA[Documento]]></text></staticText>
+      <staticText><reportElement x="84" y="3" width="72" height="16"/><textElement><font isBold="true"/></textElement><text><![CDATA[Data]]></text></staticText>
+      <staticText><reportElement x="158" y="3" width="150" height="16"/><textElement><font isBold="true"/></textElement><text><![CDATA[Parceiro]]></text></staticText>
+      <staticText><reportElement x="310" y="3" width="154" height="16"/><textElement><font isBold="true"/></textElement><text><![CDATA[Produto/Descricao]]></text></staticText>
+      <staticText><reportElement x="466" y="3" width="58" height="16"/><textElement textAlignment="Right"><font isBold="true"/></textElement><text><![CDATA[Qtd.]]></text></staticText>
+      <staticText><reportElement x="526" y="3" width="78" height="16"/><textElement textAlignment="Right"><font isBold="true"/></textElement><text><![CDATA[Preco]]></text></staticText>
+      <staticText><reportElement x="606" y="3" width="88" height="16"/><textElement textAlignment="Right"><font isBold="true"/></textElement><text><![CDATA[Total]]></text></staticText>
+      <staticText><reportElement x="696" y="3" width="82" height="16"/><textElement><font isBold="true"/></textElement><text><![CDATA[Status]]></text></staticText>
+    </band>
+  </columnHeader>
+
+  <detail>
+    <band height="20">
+      <textField><reportElement x="4" y="2" width="78" height="16"/><textFieldExpression><![CDATA[$F{documentno}]]></textFieldExpression></textField>
+      <textField pattern="dd/MM/yyyy"><reportElement x="84" y="2" width="72" height="16"/><textFieldExpression><![CDATA[$F{datedoc}]]></textFieldExpression></textField>
+      <textField isStretchWithOverflow="true"><reportElement x="158" y="2" width="150" height="16"/><textFieldExpression><![CDATA[$F{bpartner_name}]]></textFieldExpression></textField>
+      <textField isStretchWithOverflow="true"><reportElement x="310" y="2" width="154" height="16"/><textFieldExpression><![CDATA[$F{item_name}]]></textFieldExpression></textField>
+      <textField pattern="#0.##"><reportElement x="466" y="2" width="58" height="16"/><textElement textAlignment="Right"/><textFieldExpression><![CDATA[$F{qty}]]></textFieldExpression></textField>
+      <textField pattern="#,##0.00"><reportElement x="526" y="2" width="78" height="16"/><textElement textAlignment="Right"/><textFieldExpression><![CDATA[$F{priceentered}]]></textFieldExpression></textField>
+      <textField pattern="#,##0.00"><reportElement x="606" y="2" width="88" height="16"/><textElement textAlignment="Right"/><textFieldExpression><![CDATA[$F{grandtotal}]]></textFieldExpression></textField>
+      <textField><reportElement x="696" y="2" width="82" height="16"/><textFieldExpression><![CDATA[$F{status_name}]]></textFieldExpression></textField>
+    </band>
+  </detail>
+
+  <summary>
+    <band height="32">
+      <staticText><reportElement x="500" y="8" width="104" height="18"/><textElement textAlignment="Right"><font isBold="true"/></textElement><text><![CDATA[Total geral:]]></text></staticText>
+      <textField pattern="#,##0.00"><reportElement x="606" y="8" width="88" height="18"/><textElement textAlignment="Right"><font isBold="true"/></textElement><textFieldExpression><![CDATA[$V{TOTAL_GERAL}]]></textFieldExpression></textField>
+    </band>
+  </summary>
+</jasperReport>

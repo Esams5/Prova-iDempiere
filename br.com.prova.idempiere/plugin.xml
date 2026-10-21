@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         id="br.com.prova.idempiere.requestValidator"
+         name="Validador de Solicitacao de Compra"
+         point="org.adempiere.base.ModelValidator">
+      <listener
+            class="br.com.prova.idempiere.validator.RequestModelValidator"
+            priority="100">
+      </listener>
+   </extension>
+</plugin>
+

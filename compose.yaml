@@ -1,0 +1,59 @@
+name: prova-idempiere
+
+services:
+  volume-init:
+    image: idempiereofficial/idempiere:13-release
+    user: "0:0"
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["chown 1001:1001 /opt/idempiere/log /opt/idempiere/configuration /opt/idempiere/plugins"]
+    volumes:
+      - idempiere_configuration:/opt/idempiere/configuration
+      - idempiere_logs:/opt/idempiere/log
+      - idempiere_plugins:/opt/idempiere/plugins
+
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      TZ: America/Fortaleza
+      POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD:-postgres}
+    ports:
+      - "${POSTGRES_HOST_PORT:-5433}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  idempiere:
+    image: idempiereofficial/idempiere:13-release
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      volume-init:
+        condition: service_completed_successfully
+    environment:
+      TZ: America/Fortaleza
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: idempiere
+      DB_USER: adempiere
+      DB_PASS: ${IDEMPIERE_DB_PASSWORD:-adempiere}
+      DB_ADMIN_PASS: ${POSTGRES_ADMIN_PASSWORD:-postgres}
+      JAVA_OPTIONS: ${IDEMPIERE_JAVA_OPTIONS:--Xms512m -Xmx2g}
+    ports:
+      - "${IDEMPIERE_HTTPS_PORT:-8443}:8443"
+      - "127.0.0.1:${IDEMPIERE_OSGI_PORT:-12612}:12612"
+    volumes:
+      - idempiere_configuration:/opt/idempiere/configuration
+      - idempiere_logs:/opt/idempiere/log
+      - idempiere_plugins:/opt/idempiere/plugins
+
+volumes:
+  postgres_data:
+  idempiere_configuration:
+  idempiere_logs:
+  idempiere_plugins:
