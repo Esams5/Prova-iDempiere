@@ -28,15 +28,18 @@ br.com.prova.idempiere.feature/     feature instalavel
 br.com.prova.idempiere.repository/  repositorio P2
 migration/postgresql/               Application Dictionary e verificacao
 docs/                               roteiro da apresentacao
-scripts/                            teste rapido das regras
+scripts/                            utilitarios tecnicos de instalacao e diagnostico
 ```
 
 ## Pre-requisitos
 
-- iDempiere 12, 13 ou 14 com PostgreSQL;
-- Java 17 ou superior;
-- Maven 3.9 ou superior;
-- repositorio P2 gerado pela compilacao do iDempiere.
+- Docker Engine com Docker Compose;
+- navegador web;
+- Bash para os utilitarios de preparacao.
+
+No fluxo Docker, Java, PostgreSQL e as bibliotecas do iDempiere ficam dentro
+dos containers. Java 17, Maven 3.9 e um repositorio P2 local so sao necessarios
+para a compilacao PDE/P2 alternativa, fora do fluxo Docker validado.
 
 O bundle aceita `org.adempiere.base` da versao 12 ate antes da 15. Para outra
 versao, ajuste o intervalo no `MANIFEST.MF` depois de validar as APIs.
@@ -63,14 +66,22 @@ administracao inicial use `System` / `System`; para os dados de demonstracao,
 `GardenAdmin` / `GardenAdmin`. O PostgreSQL do container e publicado na porta
 local `5433`, evitando conflito com uma instalacao local na porta `5432`.
 
-Atalhos equivalentes estao em `scripts/environment.sh`:
+Depois que a preparacao unica estiver concluida, estes sao os unicos comandos
+necessarios para iniciar a apresentacao visual:
 
 ```bash
-bash scripts/environment.sh start
-bash scripts/environment.sh status
-bash scripts/environment.sh logs
-bash scripts/environment.sh stop
+docker compose up -d
+docker compose ps
 ```
+
+Depois, todo o teste e feito em `https://localhost:8443/webui/`. Nao e
+necessario executar scripts durante a apresentacao. O roteiro visual completo
+esta em [docs/TUTORIAL_VISUAL.md](docs/TUTORIAL_VISUAL.md). A explicacao dos
+conceitos Java, iDempiere e OSGi usados esta em
+[docs/CONCEITOS_PARA_APRESENTACAO.md](docs/CONCEITOS_PARA_APRESENTACAO.md).
+
+Os scripts restantes sao utilitarios para preparar uma maquina nova, recompilar
+o plugin ou diagnosticar o ambiente; eles nao fazem parte da demonstracao.
 
 Para reconstruir o bundle usando exatamente as bibliotecas do container:
 
@@ -98,24 +109,7 @@ System a lista mostra apenas `System Administrator`; deixar o campo vazio
 atualiza todas as roles nao manuais, incluindo `GardenWorld Admin`. Em seguida,
 execute **Cache Reset** e faca um novo login.
 
-O passo a passo validado, desde a inicializacao ate os dois relatorios, esta em
-[docs/ROTEIRO_APRESENTACAO.md](docs/ROTEIRO_APRESENTACAO.md). Os resultados da
-ultima validacao local estao em
-[docs/TESTES_EXECUTADOS.md](docs/TESTES_EXECUTADOS.md).
-
-## 1. Teste rapido sem servidor
-
-```bash
-bash scripts/test-rules.sh
-```
-
-Saida esperada:
-
-```text
-RequestRulesTest: OK
-```
-
-## 2. Compilacao
+## 1. Compilacao
 
 Primeiro gere o repositorio P2 do checkout do iDempiere. Depois informe o
 caminho absoluto ao Maven:
@@ -133,7 +127,7 @@ br.com.prova.idempiere.repository/target/repository
 No ambiente Eclipse de desenvolvimento, tambem e possivel importar os tres
 projetos e adicionar `br.com.prova.idempiere` a configuracao `server.product`.
 
-## 3. Banco de dados
+## 2. Banco de dados
 
 Faca backup do banco e execute como usuario da aplicacao:
 
@@ -153,7 +147,7 @@ Model Validator ativo, tres menus e o botao Aprovar configurado para aparecer
 no formulario. A migracao pode ser executada novamente sem duplicar os
 registros principais.
 
-## 4. Deploy do plugin
+## 3. Deploy do plugin
 
 Pare o servidor e instale a feature pelo mecanismo P2 usado na sua distribuicao
 do iDempiere, apontando para
@@ -167,7 +161,7 @@ Em desenvolvimento, basta habilitar o bundle na configuracao de execucao. Em
 ambos os casos, reinicie o servidor depois da instalacao para que o Model
 Validator global seja carregado.
 
-## 5. Teste funcional
+## 4. Teste funcional
 
 1. Entre como `System`, execute **Cache Reset** e depois acesse o tenant de teste.
 2. Abra **Solicitacoes de Compra**.
